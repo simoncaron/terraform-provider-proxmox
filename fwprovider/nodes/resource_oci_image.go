@@ -45,7 +45,6 @@ const ociSizeRequiresReplaceDescription = "Triggers resource force replacement i
 
 type ociSizeRequiresReplaceModifier struct{}
 
-//nolint:dupl
 func (r ociSizeRequiresReplaceModifier) PlanModifyInt64(
 	ctx context.Context,
 	req planmodifier.Int64Request,
@@ -67,39 +66,9 @@ func (r ociSizeRequiresReplaceModifier) PlanModifyInt64(
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 
 	originalStateSizeBytes, diags := req.Private.GetKey(ctx, "original_state_size")
-
 	resp.Diagnostics.Append(diags...)
 
-	if originalStateSizeBytes != nil {
-		originalStateSize, err := strconv.ParseInt(string(originalStateSizeBytes), 10, 64)
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Unable to convert original state OCI image size to int64",
-				"Unexpected error in parsing string to int64, key original_state_size. "+
-					"Please retry the operation or report this issue to the provider developers.\n\n"+
-					"Error: "+err.Error(),
-			)
-
-			return
-		}
-
-		if state.Size.ValueInt64() != originalStateSize && plan.Overwrite.ValueBool() {
-			resp.RequiresReplace = true
-			resp.PlanValue = types.Int64Value(originalStateSize)
-
-			resp.Diagnostics.AddWarning(
-				"The OCI image size in datastore has changed outside of terraform.",
-				fmt.Sprintf(
-					"Previous size: %d saved in state does not match current size from datastore: %d. "+
-						"You can disable this behaviour by using overwrite=false",
-					originalStateSize,
-					state.Size.ValueInt64(),
-				),
-			)
-
-			return
-		}
-	}
+	applySizeRequiresReplace(resp, originalStateSizeBytes, state.Size.ValueInt64(), plan.Overwrite.ValueBool(), "OCI image")
 }
 
 func (r ociSizeRequiresReplaceModifier) Description(_ context.Context) string {
@@ -395,19 +364,7 @@ func (r *ociImageResource) Read(
 	resp.Private.SetKey(ctx, "original_state_size", setOriginalValue)
 
 	err := r.read(ctx, &state)
-	if err != nil {
-		if strings.Contains(err.Error(), "failed to authenticate") {
-			resp.Diagnostics.AddError("Failed to authenticate", err.Error())
-
-			return
-		}
-
-		resp.Diagnostics.AddWarning(
-			"The OCI image does not exist in datastore and resource must be recreated.",
-			err.Error(),
-		)
-		resp.State.RemoveResource(ctx)
-
+	if handleReadResult(ctx, resp, err, "The OCI image does not exist in datastore and resource must be recreated.") {
 		return
 	}
 
@@ -437,7 +394,6 @@ func (r *ociImageResource) Update(
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
-//nolint:dupl
 func (r *ociImageResource) Delete(
 	ctx context.Context,
 	req resource.DeleteRequest,
@@ -458,21 +414,6 @@ func (r *ociImageResource) Delete(
 		ctx,
 		state.ID.ValueString(),
 	)
-	if err != nil && !errors.Is(err, api.ErrResourceDoesNotExist) {
-		if strings.Contains(err.Error(), "unable to parse") {
-			resp.Diagnostics.AddWarning(
-				"Datastore OCI image does not exists",
-				fmt.Sprintf(
-					"Could not delete datastore OCI image '%s', it does not exist or has been deleted outside of Terraform.",
-					state.ID.ValueString(),
-				),
-			)
-		} else {
-			resp.Diagnostics.AddError(
-				"Error deleting datastore OCI image",
-				fmt.Sprintf("Could not delete datastore OCI image '%s', unexpected error: %s",
-					state.ID.ValueString(), err.Error()),
-			)
-		}
-	}
+
+	handleDatastoreDeleteError(resp, err, state.ID.ValueString(), "OCI image")
 }
