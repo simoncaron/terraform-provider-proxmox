@@ -31,6 +31,7 @@ import (
 	"github.com/bpg/terraform-provider-proxmox/fwprovider/cluster/ha"
 	"github.com/bpg/terraform-provider-proxmox/fwprovider/cluster/hardwaremapping"
 	"github.com/bpg/terraform-provider-proxmox/fwprovider/cluster/metrics"
+	clusternotifications "github.com/bpg/terraform-provider-proxmox/fwprovider/cluster/notifications"
 	"github.com/bpg/terraform-provider-proxmox/fwprovider/cluster/options"
 	"github.com/bpg/terraform-provider-proxmox/fwprovider/cluster/replication"
 	sdnapplier "github.com/bpg/terraform-provider-proxmox/fwprovider/cluster/sdn/applier"
@@ -597,6 +598,11 @@ func (p *proxmoxProvider) Resources(_ context.Context) []func() resource.Resourc
 		hardwaremapping.NewUSBResourceShort, // proxmox_hardware_mapping_usb
 		metrics.NewMetricsServerResource,
 		metrics.NewMetricsServerShortResource,
+		clusternotifications.NewEndpointGotifyResource,
+		clusternotifications.NewEndpointSendmailResource,
+		clusternotifications.NewEndpointSMTPResource,
+		clusternotifications.NewEndpointWebhookResource,
+		clusternotifications.NewMatcherResource,
 		network.NewLinuxBondResource,
 		network.NewLinuxBridgeResource,
 		network.NewShortLinuxBridgeResource,

@@ -17,6 +17,7 @@ import (
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/ha"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/mapping"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/metrics"
+	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/notifications"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/replications"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/sdn/applier"
 	"github.com/bpg/terraform-provider-proxmox/proxmox/cluster/sdn/controllers"
@@ -72,6 +73,11 @@ func (c *Client) Ceph() *ceph.Client {
 // Metrics returns a client for managing the cluster's metrics features.
 func (c *Client) Metrics() *metrics.Client {
 	return &metrics.Client{Client: c}
+}
+
+// Notifications returns a client for managing the cluster's notification endpoints and matchers.
+func (c *Client) Notifications() *notifications.Client {
+	return &notifications.Client{Client: c}
 }
 
 // SDNZones returns a client for managing the cluster's SDN zones.

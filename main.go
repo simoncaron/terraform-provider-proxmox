@@ -148,6 +148,11 @@ import (
 //go:generate cp ./build/docs-gen/resources/virtual_environment_harule.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/metrics_server.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/virtual_environment_metrics_server.md ./docs/resources/
+//go:generate cp ./build/docs-gen/resources/notifications_endpoint_gotify.md ./docs/resources/
+//go:generate cp ./build/docs-gen/resources/notifications_endpoint_sendmail.md ./docs/resources/
+//go:generate cp ./build/docs-gen/resources/notifications_endpoint_smtp.md ./docs/resources/
+//go:generate cp ./build/docs-gen/resources/notifications_endpoint_webhook.md ./docs/resources/
+//go:generate cp ./build/docs-gen/resources/notifications_matcher.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/network_linux_bond.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/virtual_environment_network_linux_bridge.md ./docs/resources/
 //go:generate cp ./build/docs-gen/resources/network_linux_bridge.md ./docs/resources/
